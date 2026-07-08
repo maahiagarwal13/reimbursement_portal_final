@@ -1,0 +1,137 @@
+{
+  "domesticPerDiem": {
+    "description": "Daily per diem allowance for domestic travel (INR)",
+    "rates": {
+      "CL4": { "value": 1500 },
+      "CL3": {
+        "over5": { "value": 1500 },
+        "under5": { "value": 1000 }
+      },
+      "CL2": { "value": 800 }
+    }
+  },
+
+  "domesticHotel": {
+    "description": "Nightly hotel cap for domestic travel (INR). null = actuals/uncapped.",
+    "tiers": ["A+", "A", "B", "C"],
+    "rates": {
+      "CL4": [null, 8000, 6000, 5000],
+      "CL3": {
+        "over5": [8000, 7000, 5000, 4500],
+        "under5": [5500, 4500, 3500, 2500]
+      },
+      "CL2": [5500, 4500, 3500, 2500]
+    }
+  },
+
+  "domesticFlight": {
+    "description": "Flight reimbursement for domestic travel. null = actuals, no cap for all CLs.",
+    "rates": {
+      "CL4": { "value": null },
+      "CL3": { "value": null },
+      "CL2": { "value": null }
+    }
+  },
+
+  "intlPerDiem": {
+    "description": "Daily per diem for international travel (USD). Indexed by tier: [A, B, C].",
+    "tiers": ["A", "B", "C"],
+    "currency": "USD",
+    "rates": {
+      "CL4": [70, 65, 60],
+      "CL3": [65, 60, 55],
+      "CL2": [60, 55, 50]
+    }
+  },
+
+  "intlHotel": {
+    "description": "Nightly hotel cap for international travel (USD). Indexed by tier: [A, B, C].",
+    "tiers": ["A", "B", "C"],
+    "currency": "USD",
+    "rates": {
+      "CL4": [200, 170, 150],
+      "CL3": [180, 150, 130],
+      "CL2": [180, 150, 130]
+    }
+  },
+
+  "japanPerDiem": {
+    "description": "Daily per diem for Japan travel (JPY).",
+    "currency": "JPY",
+    "rates": {
+      "CL4": { "value": 10000 },
+      "CL3": { "value": 8000 },
+      "CL2": { "value": 8000 }
+    }
+  },
+
+  "japanHotel": {
+    "description": "Nightly hotel cap for Japan travel (JPY).",
+    "currency": "JPY",
+    "rates": {
+      "CL4": { "value": 17000 },
+      "CL3": { "value": 15000 },
+      "CL2": { "value": 15000 }
+    }
+  },
+
+  "relocationAccommodation": {
+    "description": "Monthly accommodation cap for relocation (INR).",
+    "rates": {
+      "CL2": { "value": 20000 },
+      "CL3": { "value": 30000 },
+      "CL4": { "value": 50000 }
+    }
+  },
+
+  "relocationBrokerage": {
+    "description": "One-time brokerage cap for relocation (INR).",
+    "rates": {
+      "CL2": { "value": 8000 },
+      "CL3": { "value": 10000 },
+      "CL4": { "value": 15000 }
+    }
+  },
+
+  "relocationShipment": {
+    "description": "One-time shipment cap for relocation (INR).",
+    "rates": {
+      "CL2": { "value": 6000 },
+      "CL3": { "value": 10000 },
+      "CL4": { "value": 15000 }
+    }
+  },
+
+  "carpoolOwnFuelRate": {
+    "description": "Fuel price per litre for own-vehicle carpool claims (INR). Admin-editable.",
+    "value": 100,
+    "unit": "per_litre"
+  },
+
+  "carpoolOwnMileage": {
+    "description": "Assumed mileage for own-vehicle carpool claims (km per litre). Admin-editable.",
+    "value": 7,
+    "unit": "km_per_litre"
+  },
+
+  "carpoolCapOneWay": {
+    "description": "Daily cap for one-way carpool claims (INR).",
+    "value": 500,
+    "unit": "per_day"
+  },
+
+  "carpoolCapBothWay": {
+    "description": "Daily cap for both-way (round-trip) carpool claims (INR).",
+    "value": 1000,
+    "unit": "per_day"
+  },
+
+  "internetCap": {
+    "description": "Monthly internet reimbursement cap (INR).",
+    "rates": {
+      "CL2": { "value": 1000 },
+      "CL3": { "value": 1500 },
+      "CL4": { "value": 2000 }
+    }
+  }
+}

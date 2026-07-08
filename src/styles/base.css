@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FAF9F6;
+  --color-samsung-blue: #1428A0;
+  --color-border: #E5E3DD;
+  --color-status-pending: #B8935F;
+  --color-status-approved: #6B8F71;
+  --color-status-rejected: #B85C4D;
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Fraunces", serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-gray-800 font-sans antialiased;
+  }
+  
+  /* Strict enforcement of NO animations/transitions */
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

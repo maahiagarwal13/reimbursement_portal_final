@@ -1,0 +1,302 @@
+[
+  {
+    "id": "REQ-2025-0001-A7B3",
+    "ghrId": "40261873",
+    "type": "travel",
+    "subtype": "domestic",
+    "stage": "settlement",
+    "preApprovalStatus": "approved",
+    "settlementStatus": "pending",
+    "dates": {
+      "startDate": "2025-06-10",
+      "endDate": "2025-06-14"
+    },
+    "purpose": "Knox SDK integration workshop with Bengaluru platform team",
+    "destination": "Bengaluru",
+    "documents": {
+      "preApproval": {
+        "knoxApproval": [{ "name": "knox-approval-blr.pdf" }],
+        "travelInsurance": [{ "name": "insurance-blr.pdf" }],
+        "visa": null,
+        "passport": null
+      },
+      "settlement": [
+        { "name": "taj-bengaluru-receipt.pdf" },
+        { "name": "6e-2341-bom-blr.pdf" }
+      ]
+    },
+    "settlement": {
+      "hotelName": "Taj MG Road",
+      "hotelActual": 7200,
+      "flightActual": 11500,
+      "conveyanceActual": 850,
+      "conveyanceDetails": "Cab/Taxi",
+      "winterClothesActual": 0,
+      "perDiemDays": 5,
+      "perDiemRate": 750,
+      "perDiemTotal": 3750,
+      "hotelCap": 4000,
+      "hotelReimbursable": 7200,
+      "flightReimbursable": 11500,
+      "conveyanceReimbursable": 850,
+      "winterClothesReimbursable": 0,
+      "totalReimbursable": 24100,
+      "cityTier": "A",
+      "currency": "INR"
+    },
+    "submittedAt": "2025-06-15T09:30:00.000Z",
+    "financeNote": null
+  },
+  {
+    "id": "REQ-2025-0002-C4D8",
+    "ghrId": "40492156",
+    "type": "travel",
+    "subtype": "international",
+    "stage": "pre-approval",
+    "preApprovalStatus": "pending",
+    "settlementStatus": null,
+    "dates": {
+      "startDate": "2025-08-05",
+      "endDate": "2025-08-12"
+    },
+    "purpose": "Galaxy QA automation framework review with Tokyo QC division",
+    "destination": "Japan",
+    "documents": {
+      "preApproval": {
+        "knoxApproval": [{ "name": "knox-approval-japan.pdf" }],
+        "travelInsurance": [{ "name": "insurance-japan.pdf" }],
+        "visa": [{ "name": "japan-visa.pdf" }],
+        "passport": [{ "name": "passport-copy.pdf" }]
+      },
+      "settlement": null
+    },
+    "settlement": null,
+    "submittedAt": "2025-07-01T14:20:00.000Z",
+    "financeNote": null
+  },
+  {
+    "id": "REQ-2025-0003-E9F2",
+    "ghrId": "40387291",
+    "type": "internet-bill",
+    "subtype": null,
+    "stage": "review",
+    "preApprovalStatus": null,
+    "settlementStatus": "approved",
+    "title": "Internet Bill Reimbursement",
+    "dates": {
+      "billingMonth": "2025-05",
+      "submittedDate": "2025-06-05"
+    },
+    "purpose": "Monthly home internet for remote work — Bixby NLP model training",
+    "destination": null,
+    "internetBillRequest": {
+      "provider": "Airtel Fiber",
+      "frequency": "Monthly",
+      "totalAmount": 999,
+      "claimableAmount": 999,
+      "reimbursedTillMonth": null,
+      "periods": [
+        {
+          "periodLabel": "May 2025",
+          "amount": 999,
+          "billDocument": "airtel-fiber-may-2025.pdf"
+        }
+      ]
+    },
+    "documents": {
+      "internetBill": "airtel-fiber-may-2025.pdf",
+      "isSelfDeclared": false,
+      "declarationText": null
+    },
+    "settlement": {
+      "claimedAmount": 999,
+      "cap": 1000,
+      "approvedAmount": 999,
+      "currency": "INR"
+    },
+    "submittedAt": "2025-06-05T11:00:00.000Z",
+    "financeNote": "Approved — within CL2 internet cap."
+  },
+  {
+    "id": "REQ-2025-0004-G1H5",
+    "ghrId": "40623890",
+    "type": "carpool",
+    "subtype": null,
+    "stage": "review",
+    "preApprovalStatus": null,
+    "settlementStatus": "pending",
+    "dates": {
+      "claimMonth": "2025-06",
+      "workingDays": 22
+    },
+    "purpose": "Daily commute to Noida SEC office — own vehicle",
+    "destination": null,
+    "documents": {
+      "vehicleRegistration": "vikram-dl-reg.pdf",
+      "fuelReceipts": ["petrol-jun-01.pdf", "petrol-jun-15.pdf"]
+    },
+    "settlement": {
+      "vehicleType": "own",
+      "claimType": "both_way",
+      "distanceOneWayKm": 18,
+      "totalDistanceKm": 792,
+      "fuelRate": 100,
+      "mileage": 7,
+      "computedCost": 11314,
+      "dailyCap": 1000,
+      "cappedTotal": 22000,
+      "reimbursable": 11314,
+      "currency": "INR"
+    },
+    "submittedAt": "2025-07-01T08:45:00.000Z",
+    "financeNote": null
+  },
+  {
+    "id": "REQ-2025-0005-J3K7",
+    "ghrId": "40518734",
+    "type": "relocation",
+    "subtype": null,
+    "stage": "review",
+    "preApprovalStatus": null,
+    "settlementStatus": "pending",
+    "dates": {
+      "relocationDate": "2025-05-20",
+      "submittedDate": "2025-06-01"
+    },
+    "purpose": "Relocation from Chennai to Noida for Support Portal project transition",
+    "destination": "Noida",
+    "documents": {
+      "accommodationReceipts": ["flat-rent-agreement.pdf"],
+      "brokerageReceipt": "broker-receipt.pdf",
+      "shipmentReceipt": "packers-movers-invoice.pdf"
+    },
+    "settlement": {
+      "lineItems": [
+        {
+          "component": "accommodation",
+          "actualAmount": 35000,
+          "cap": 30000,
+          "reimbursable": 30000
+        },
+        {
+          "component": "brokerage",
+          "actualAmount": 8000,
+          "cap": 10000,
+          "reimbursable": 8000
+        },
+        {
+          "component": "shipment",
+          "actualAmount": 12000,
+          "cap": 10000,
+          "reimbursable": 10000
+        }
+      ],
+      "totalReimbursable": 48000,
+      "currency": "INR"
+    },
+    "submittedAt": "2025-06-01T16:00:00.000Z",
+    "financeNote": null
+  },
+  {
+    "id": "REQ-2025-0006-L5M9",
+    "ghrId": "40956123",
+    "type": "travel",
+    "subtype": "domestic",
+    "stage": "pre-approval",
+    "preApprovalStatus": "pending",
+    "settlementStatus": null,
+    "dates": {
+      "startDate": "2025-07-20",
+      "endDate": "2025-07-22"
+    },
+    "purpose": "Internal IT support deployment at Jaipur regional office",
+    "destination": "Jaipur",
+    "documents": {
+      "preApproval": {
+        "knoxApproval": null,
+        "travelInsurance": [{ "name": "insurance-jai.pdf" }],
+        "visa": null,
+        "passport": null
+      },
+      "settlement": null
+    },
+    "settlement": null,
+    "submittedAt": "2025-07-03T10:15:00.000Z",
+    "financeNote": null
+  },
+  {
+    "id": "REQ-2025-0007-N8P2",
+    "ghrId": "40734521",
+    "type": "internet-bill",
+    "subtype": null,
+    "stage": "review",
+    "preApprovalStatus": null,
+    "settlementStatus": "pending",
+    "title": "Internet Bill Reimbursement",
+    "dates": {
+      "billingMonth": "2025-06",
+      "submittedDate": "2025-07-02"
+    },
+    "purpose": "Monthly internet — self-declaration (bill unavailable due to provider migration)",
+    "destination": null,
+    "internetBillRequest": {
+      "provider": "Jio Fiber",
+      "frequency": "Monthly",
+      "totalAmount": 1200,
+      "claimableAmount": 1200,
+      "reimbursedTillMonth": null,
+      "periods": [
+        {
+          "periodLabel": "June 2025",
+          "amount": 1200,
+          "billDocument": null
+        }
+      ]
+    },
+    "documents": {
+      "internetBill": null,
+      "isSelfDeclared": true,
+      "declarationText": "I declare that I have incurred internet expenses of ₹1,200 for the month of June 2025. Bill is unavailable due to ISP migration from ACT to Jio Fiber. The new connection bill cycle starts July."
+    },
+    "settlement": {
+      "claimedAmount": 1200,
+      "cap": 1500,
+      "approvedAmount": null,
+      "currency": "INR"
+    },
+    "submittedAt": "2025-07-02T13:30:00.000Z",
+    "financeNote": null
+  },
+  {
+    "id": "REQ-2025-0008-Q6R4",
+    "ghrId": "40845672",
+    "type": "carpool",
+    "subtype": null,
+    "stage": "review",
+    "preApprovalStatus": null,
+    "settlementStatus": "approved",
+    "dates": {
+      "claimMonth": "2025-05",
+      "workingDays": 20
+    },
+    "purpose": "Daily commute to Noida SEC office — rented cab shared with 2 colleagues",
+    "destination": null,
+    "documents": {
+      "cabReceipts": ["uber-may-summary.pdf"],
+      "coPassengerDeclaration": "co-passenger-declaration-may.pdf"
+    },
+    "settlement": {
+      "vehicleType": "rented",
+      "claimType": "both_way",
+      "distanceOneWayKm": 25,
+      "totalDistanceKm": 1000,
+      "claimedAmount": 15000,
+      "dailyCap": 1000,
+      "cappedTotal": 20000,
+      "reimbursable": 15000,
+      "currency": "INR"
+    },
+    "submittedAt": "2025-06-03T09:00:00.000Z",
+    "financeNote": "Approved — rented cab receipts verified. Within daily cap."
+  }
+]
