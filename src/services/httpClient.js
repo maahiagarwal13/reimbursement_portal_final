@@ -89,22 +89,30 @@ const request = async (path, options = {}) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
 
+  const mergedHeaders = {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    ...buildHeaders(),
+    ...(options.headers || {}),
+  };
+
+  if (options.body instanceof FormData) {
+    delete mergedHeaders['Content-Type'];
+  }
+
+  window.dispatchEvent(new Event('api-request-start'));
   try {
     response = await fetch(url, {
       cache: 'no-store',
       ...options,
       signal: controller.signal,
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        ...buildHeaders(),
-        ...(options.headers || {}),
-      },
+      headers: mergedHeaders,
     });
     clearTimeout(timeoutId);
   } catch (error) {
     clearTimeout(timeoutId);
+    window.dispatchEvent(new Event('api-request-end'));
     if (error.name === 'AbortError') {
       throw new Error('Network error: Request timed out (15s). Ensure the server is running.');
     }
@@ -114,6 +122,7 @@ const request = async (path, options = {}) => {
 
   // Handle 204 No Content (e.g. DELETE responses)
   if (response.status === 204) {
+    window.dispatchEvent(new Event('api-request-end'));
     return null;
   }
 
@@ -134,6 +143,7 @@ const request = async (path, options = {}) => {
   }
 
   if (!response.ok) {
+    window.dispatchEvent(new Event('api-request-end'));
     const errorMessage =
       data?.message || data?.title || response.statusText || 'Request failed';
     const error = new Error(errorMessage);
@@ -142,6 +152,7 @@ const request = async (path, options = {}) => {
     throw error;
   }
 
+  window.dispatchEvent(new Event('api-request-end'));
   return data;
 };
 
@@ -157,27 +168,44 @@ export const get = async (path) => {
 /**
  * HTTP POST request.
  * @param {string} path - API path.
- * @param {any} body - Request body (will be JSON-stringified).
+ * @param {any} body - Request body (will be JSON-stringified, unless it is FormData).
+ * @param {RequestInit} customOptions - Additional fetch options.
  * @returns {Promise<any>}
  */
-export const post = async (path, body) => {
-  return request(path, {
+export const post = async (path, body, customOptions = {}) => {
+  const isFormData = body instanceof FormData;
+  const options = {
     method: 'POST',
-    body: JSON.stringify(body),
-  });
+    body: isFormData ? body : JSON.stringify(body),
+    ...customOptions,
+  };
+
+  if (isFormData) {
+    options.headers = { ...options.headers };
+    // Let the browser set the Content-Type automatically (with boundary)
+    // We can't pass undefined, so we use a Headers object or explicitly delete it before fetch.
+    // However, in our request wrapper we merge headers. We will handle it by overriding.
+  }
+
+  return request(path, options);
 };
 
 /**
  * HTTP PUT request.
  * @param {string} path - API path.
- * @param {any} body - Request body (will be JSON-stringified).
+ * @param {any} body - Request body (will be JSON-stringified, unless it is FormData).
+ * @param {RequestInit} customOptions - Additional fetch options.
  * @returns {Promise<any>}
  */
-export const put = async (path, body) => {
-  return request(path, {
+export const put = async (path, body, customOptions = {}) => {
+  const isFormData = body instanceof FormData;
+  const options = {
     method: 'PUT',
-    body: JSON.stringify(body),
-  });
+    body: isFormData ? body : JSON.stringify(body),
+    ...customOptions,
+  };
+
+  return request(path, options);
 };
 
 /**

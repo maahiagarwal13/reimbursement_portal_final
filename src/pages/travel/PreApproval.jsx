@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { createTravelPreApproval, getRequestsByEmployee, saveDraftRequest, getRequestById } from '../../services/requests';
 import { getDomesticCityTiers, getIntlCountryTiers, getRateConfig } from '../../services/rateConfig';
 import FormField from '../../components/shared/FormField';
@@ -14,6 +15,7 @@ import { formatDate } from '../../utils/formatters';
 
 export default function PreApproval() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const draftId = searchParams.get('draftId');
@@ -88,7 +90,20 @@ export default function PreApproval() {
 
   useEffect(() => {
     async function loadDraft() {
-      if (draftId) {
+      // Check local storage first
+      const localDraftJson = localStorage.getItem(`draft_travel_${draftId || 'new'}`);
+      if (localDraftJson) {
+        try {
+          const draft = JSON.parse(localDraftJson);
+          if (draft.formData) setFormData(draft.formData);
+          if (draft.step) setStep(draft.step);
+          return; // If local draft exists, use it
+        } catch (err) {
+          console.error("Failed to parse local draft", err);
+        }
+      }
+
+      if (draftId && draftId !== 'new') {
         try {
           const draft = await getRequestById(draftId);
           if (draft && draft.stage === 'draft' && draft.draftData) {
@@ -103,11 +118,14 @@ export default function PreApproval() {
     loadDraft();
   }, [draftId]);
 
-  const handleSaveDraft = async () => {
+  const handleSaveDraft = async (isAuto = false) => {
     try {
       const draft = { formData, step };
       localStorage.setItem(`draft_travel_${draftId || 'new'}`, JSON.stringify(draft));
-      navigate('/requests', { state: { toastMessage: 'Saved as draft', toastType: 'success' } });
+      const msg = isAuto === true 
+        ? t('preapproval.missingDocsDraft', 'Missing required documents. Saved as draft.') 
+        : t('preapproval.saveDraft', 'Saved as draft');
+      navigate('/requests', { state: { toastMessage: msg, toastType: 'success' } });
     } catch (err) {
       setToast({ visible: true, message: 'Failed to save draft: ' + err.message, type: 'error' });
     }
@@ -116,6 +134,21 @@ export default function PreApproval() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
+
+    // Check for missing documents
+    const missingDocs = [];
+    if (!formData.knoxApproval || formData.knoxApproval.length === 0) missingDocs.push('Knox Approval');
+    if (!formData.travelInsurance || formData.travelInsurance.length === 0) missingDocs.push('Travel Insurance');
+    if (formData.subtype === 'international') {
+      if (!formData.visa || formData.visa.length === 0) missingDocs.push('Visa');
+      if (!formData.passport || formData.passport.length === 0) missingDocs.push('Passport');
+    }
+
+    if (missingDocs.length > 0) {
+      await handleSaveDraft(true);
+      return;
+    }
+
     setLoading(true);
     try {
       await createTravelPreApproval({
@@ -243,17 +276,17 @@ export default function PreApproval() {
         ← Back to request types
       </button>
       
-      <div className="pb-4 border-b border-border bg-gradient-to-b from-blue-50/30 to-transparent -mx-6 px-6 pt-2 mb-2">
-        <h1 className="font-serif text-2xl font-semibold text-gray-900">Travel Pre-Approval</h1>
-        <p className="text-sm font-mono tracking-wide uppercase text-gray-500 mt-1">Step {step} of 2: {step === 1 ? 'Obtain approval before traveling' : 'Review Submission'}</p>
+      <div className="pb-4 border-b border-border dark:border-slate-700 bg-gradient-to-b from-blue-50/30 dark:from-slate-800/50 to-transparent -mx-6 px-6 pt-2 mb-2">
+        <h1 className="font-serif text-2xl font-semibold text-gray-900 dark:text-gray-100">Travel Pre-Approval</h1>
+        <p className="text-sm font-mono tracking-wide uppercase text-gray-500 dark:text-slate-400 mt-1">Step {step} of 2: {step === 1 ? 'Obtain approval before traveling' : 'Review Submission'}</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Left Column: Form */}
-        <div className="flex-1 min-w-0 xl:col-span-9 bg-white rounded-lg shadow-sm border-t-4 border-samsung-blue border-l border-r border-b border-border">
-          <div className="px-6 md:px-8 py-5 border-b border-border flex justify-between items-center bg-gray-50/50">
-            <h2 className="text-base font-semibold text-gray-900 m-0">Pre-Approval Form</h2>
+        <div className="flex-1 min-w-0 xl:col-span-9 bg-white dark:bg-gray-800 rounded-lg shadow-sm border-t-4 border-samsung-blue border-l border-r border-b border-border dark:border-gray-700">
+          <div className="px-6 md:px-8 py-5 border-b border-border dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 m-0">Pre-Approval Form</h2>
           </div>
           
           <form onSubmit={e => { e.preventDefault(); if (step === 1) setStep(2); else handleSubmit(e); }} className="p-6 md:p-8 w-full">
@@ -266,22 +299,22 @@ export default function PreApproval() {
                       type="radio" 
                       name="subtype" 
                       value="domestic" 
-                      className="text-samsung-blue focus:ring-samsung-blue border-gray-300"
+                      className="text-samsung-blue focus:ring-samsung-blue border-gray-300 dark:border-gray-600 dark:bg-gray-900"
                       checked={formData.subtype === 'domestic'}
                       onChange={() => setFormData({...formData, subtype: 'domestic', destination: ''})}
                     />
-                    <span className="text-sm font-medium text-gray-900">Domestic</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Domestic</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input 
                       type="radio" 
                       name="subtype" 
                       value="international" 
-                      className="text-samsung-blue focus:ring-samsung-blue border-gray-300"
+                      className="text-samsung-blue focus:ring-samsung-blue border-gray-300 dark:border-gray-600 dark:bg-gray-900"
                       checked={formData.subtype === 'international'}
                       onChange={() => setFormData({...formData, subtype: 'international', destination: ''})}
                     />
-                    <span className="text-sm font-medium text-gray-900">International</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">International</span>
                   </label>
                 </div>
 
@@ -309,44 +342,43 @@ export default function PreApproval() {
                   required 
                 />
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                  <UploadZone 
-                    id="knoxApproval" 
-                    label="Knox Approval" 
-                    accept=".pdf,.png,.jpg" 
-                    files={formData.knoxApproval}
-                    onFilesChange={(f) => setFormData({...formData, knoxApproval: f})}
-                    required 
-                  />
-                  <UploadZone 
-                    id="travelInsurance" 
-                    label="Travel Insurance" 
-                    accept=".pdf,.png,.jpg" 
-                    files={formData.travelInsurance}
-                    onFilesChange={(f) => setFormData({...formData, travelInsurance: f})}
-                    required 
-                  />
-                  {formData.subtype === 'international' && (
-                    <>
+                <div className="mt-8 border-t border-border pt-6">
+                    <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('preapproval.documents', 'Supporting Documents')}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <UploadZone 
-                        id="visa" 
-                        label="Visa" 
+                        id="knoxApproval" 
+                        label="Knox Approval" 
                         accept=".pdf,.png,.jpg" 
-                        files={formData.visa}
-                        onFilesChange={(f) => setFormData({...formData, visa: f})}
-                        required 
+                        files={formData.knoxApproval}
+                        onFilesChange={(f) => setFormData({...formData, knoxApproval: f})}
                       />
                       <UploadZone 
-                        id="passport" 
-                        label="Passport" 
+                        id="travelInsurance" 
+                        label="Travel Insurance" 
                         accept=".pdf,.png,.jpg" 
-                        files={formData.passport}
-                        onFilesChange={(f) => setFormData({...formData, passport: f})}
-                        required 
+                        files={formData.travelInsurance}
+                        onFilesChange={(f) => setFormData({...formData, travelInsurance: f})}
                       />
-                    </>
-                  )}
-                </div>
+                      {formData.subtype === 'international' && (
+                        <>
+                          <UploadZone 
+                            id="visa" 
+                            label="Visa" 
+                            accept=".pdf,.png,.jpg" 
+                            files={formData.visa}
+                            onFilesChange={(f) => setFormData({...formData, visa: f})}
+                          />
+                          <UploadZone 
+                            id="passport" 
+                            label="Passport" 
+                            accept=".pdf,.png,.jpg" 
+                            files={formData.passport}
+                            onFilesChange={(f) => setFormData({...formData, passport: f})}
+                          />
+                        </>
+                      )}
+                    </div>
+                  </div>
 
               </div>
             )}
@@ -354,32 +386,32 @@ export default function PreApproval() {
             {step === 2 && (
               <div>
                 <div className="mb-6">
-                  <h3 className="text-sm font-semibold mb-3 text-gray-900 border-b border-border pb-2">Trip Overview</h3>
+                  <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100 border-b border-border dark:border-gray-700 pb-2">Trip Overview</h3>
                   <div className="grid grid-cols-2 gap-y-4 text-sm">
-                    <div className="text-gray-500">Trip Type:</div>
-                    <div className="font-medium text-gray-900 capitalize">{formData.subtype}</div>
-                    <div className="text-gray-500">Destination:</div>
-                    <div className="font-medium text-gray-900">{formData.destination}</div>
-                    <div className="text-gray-500">Travel Dates:</div>
-                    <div className="font-medium text-gray-900">{formData.startDate} to {formData.endDate}</div>
-                    <div className="text-gray-500">Purpose:</div>
-                    <div className="font-medium text-gray-900">{formData.purpose}</div>
+                    <div className="text-gray-500 dark:text-gray-400">Trip Type:</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100 capitalize">{formData.subtype}</div>
+                    <div className="text-gray-500 dark:text-gray-400">Destination:</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{formData.destination}</div>
+                    <div className="text-gray-500 dark:text-gray-400">Travel Dates:</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{formData.startDate} to {formData.endDate}</div>
+                    <div className="text-gray-500 dark:text-gray-400">Purpose:</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{formData.purpose}</div>
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <h3 className="text-sm font-semibold mb-3 text-gray-900 border-b border-border pb-2">Attached Documents</h3>
+                  <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100 border-b border-border dark:border-gray-700 pb-2">Attached Documents</h3>
                   <div className="grid grid-cols-2 gap-y-4 text-sm">
-                    <div className="text-gray-500">Knox Approval:</div>
-                    <div className="font-medium text-gray-900">{formData.knoxApproval[0]?.name || 'Pending'}</div>
-                    <div className="text-gray-500">Insurance:</div>
-                    <div className="font-medium text-gray-900">{formData.travelInsurance[0]?.name || 'Pending'}</div>
+                    <div className="text-gray-500 dark:text-gray-400">Knox Approval:</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{formData.knoxApproval[0]?.name || 'Pending'}</div>
+                    <div className="text-gray-500 dark:text-gray-400">Insurance:</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{formData.travelInsurance[0]?.name || 'Pending'}</div>
                     {formData.subtype === 'international' && (
                       <>
-                        <div className="text-gray-500">Visa:</div>
-                        <div className="font-medium text-gray-900">{formData.visa[0]?.name || 'Pending'}</div>
-                        <div className="text-gray-500">Passport:</div>
-                        <div className="font-medium text-gray-900">{formData.passport[0]?.name || 'Pending'}</div>
+                        <div className="text-gray-500 dark:text-gray-400">Visa:</div>
+                        <div className="font-medium text-gray-900 dark:text-gray-100">{formData.visa[0]?.name || 'Pending'}</div>
+                        <div className="text-gray-500 dark:text-gray-400">Passport:</div>
+                        <div className="font-medium text-gray-900 dark:text-gray-100">{formData.passport[0]?.name || 'Pending'}</div>
                       </>
                     )}
                   </div>
@@ -391,12 +423,12 @@ export default function PreApproval() {
               </div>
             )}
             
-            <div className="mt-6 pt-6 border-t border-border flex justify-between items-center">
+            <div className="mt-6 pt-6 border-t border-border dark:border-gray-700 flex justify-between items-center">
               {step === 1 ? (
                 <>
-                  <button type="button" onClick={() => navigate('/new-request')} className="text-gray-600 hover:text-gray-900 font-medium text-sm">Cancel</button>
+                  <button type="button" onClick={() => navigate('/new-request')} className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium text-sm">Cancel</button>
                   <div className="flex gap-3">
-                    <button type="button" onClick={handleSaveDraft} className="px-6 py-2.5 rounded-md font-medium text-sm border border-border text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200">
+                    <button type="button" onClick={handleSaveDraft} className="px-6 py-2.5 rounded-md font-medium text-sm border border-border dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800/50 focus:outline-none">
                       Save as Draft
                     </button>
                     <button type="submit" className="bg-samsung-blue text-white px-6 py-2.5 rounded-md font-medium text-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-samsung-blue">
@@ -406,13 +438,13 @@ export default function PreApproval() {
                 </>
               ) : (
                 <>
-                  <button type="button" onClick={() => setStep(1)} className="text-gray-600 hover:text-gray-900 font-medium text-sm">← Back to Edit</button>
+                  <button type="button" onClick={() => setStep(1)} className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium text-sm">← Back to Edit</button>
                   <div className="flex gap-3">
-                    <button type="button" onClick={handleSaveDraft} className="px-6 py-2.5 rounded-md font-medium text-sm border border-border text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200">
-                      Save as Draft
+                    <button type="button" onClick={() => handleSaveDraft(false)} className="px-6 py-2.5 rounded-md font-medium text-sm border border-border dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800/50 focus:outline-none">
+                      {t('preapproval.saveDraft', 'Save as Draft')}
                     </button>
-                    <button type="submit" disabled={loading} className="bg-samsung-blue text-white px-6 py-2.5 rounded-md font-medium text-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-samsung-blue disabled:opacity-70 disabled:cursor-not-allowed">
-                      {loading ? 'Submitting...' : 'Submit Pre-Approval'}
+                    <button type="submit" disabled={loading} className="bg-samsung-blue text-white px-6 py-2.5 rounded-md font-medium text-sm hover:bg-blue-800 focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed">
+                      {loading ? 'Submitting...' : t('preapproval.submit', 'Submit Pre-Approval')}
                     </button>
                   </div>
                 </>
@@ -423,56 +455,56 @@ export default function PreApproval() {
 
         {/* Right Column: Contextual Info */}
         <div className="w-full lg:w-[360px] shrink-0 xl:col-span-3 flex flex-col gap-6 sticky top-6">
-          <div className="bg-white p-6 rounded-lg border border-border shadow-sm">
-            <h3 className="text-base font-semibold flex items-center gap-2 mb-5 text-gray-900">
-              <Info size={18} className="text-samsung-blue" /> What you'll need
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-border dark:border-gray-700 shadow-sm">
+            <h3 className="text-base font-semibold flex items-center gap-2 mb-5 text-gray-900 dark:text-gray-100">
+              <Info size={18} className="text-samsung-blue dark:text-blue-400" /> What you'll need
             </h3>
             
-            <ul className="pl-5 list-disc text-gray-600 text-sm flex flex-col gap-2 mb-6 marker:text-samsung-blue">
+            <ul className="pl-5 list-disc text-gray-600 dark:text-gray-400 text-sm flex flex-col gap-2 mb-6 marker:text-samsung-blue">
               <li>Purpose of visit details</li>
               {formData.subtype === 'international' ? (
                 <>
-                  <li><strong className="text-gray-900">Knox Approval</strong> (Required)</li>
-                  <li><strong className="text-gray-900">Travel Insurance</strong> (Required)</li>
-                  <li><strong className="text-gray-900">Visa & Passport</strong> (Required)</li>
+                  <li><strong className="text-gray-900 dark:text-gray-200">Knox Approval</strong></li>
+                  <li><strong className="text-gray-900 dark:text-gray-200">Travel Insurance</strong></li>
+                  <li><strong className="text-gray-900 dark:text-gray-200">Visa & Passport</strong></li>
                 </>
               ) : (
                 <>
-                  <li><strong className="text-gray-900">Knox Approval</strong> (Required)</li>
-                  <li><strong className="text-gray-900">Travel Insurance</strong> (Required)</li>
+                  <li><strong className="text-gray-900 dark:text-gray-200">Knox Approval</strong></li>
+                  <li><strong className="text-gray-900 dark:text-gray-200">Travel Insurance</strong></li>
                 </>
               )}
+              <li className="text-gray-500 italic mt-2">Note: Missing documents will result in an auto-draft.</li>
             </ul>
 
-            <h4 className="text-sm font-semibold text-gray-900 mb-4 border-t border-gray-100 pt-4">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4 border-t border-gray-100 dark:border-gray-700 pt-4">
               Applicable Rates
             </h4>
             
             {formData.destination ? (
               <div className="flex flex-col gap-3">
-                <p className="text-xs text-gray-500 mb-1">
-                  Based on <strong className="text-gray-700">{user.clLevel || 'CL3'}</strong> traveling to <strong className="text-gray-700">{formData.destination}</strong> (Tier {selectedTierInfo})
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                  Based on <strong className="text-gray-700 dark:text-gray-200">{user.clLevel || 'CL3'}</strong> traveling to <strong className="text-gray-700 dark:text-gray-200">{formData.destination}</strong> (Tier {selectedTierInfo})
                 </p>
-                <div className="flex justify-between items-center bg-gray-50 p-2.5 rounded-md border border-border">
-                  <span className="text-sm text-gray-600">Hotel Cap:</span>
-                  <span className="font-mono text-sm font-semibold text-gray-900">{displayRate?.hotel}</span>
+                <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-md border border-border dark:border-gray-700">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Hotel Cap:</span>
+                  <span className="font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">{displayRate?.hotel}</span>
                 </div>
-                <div className="flex justify-between items-center bg-gray-50 p-2.5 rounded-md border border-border">
-                  <span className="text-sm text-gray-600">Per Diem:</span>
-                  <span className="font-mono text-sm font-semibold text-gray-900">{displayRate?.perDiem} / day</span>
+                <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-md border border-border dark:border-gray-700">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Per Diem:</span>
+                  <span className="font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">{displayRate?.perDiem} / day</span>
                 </div>
 
-                {/* Estimated Total Calculation */}
                 {estimatedTotal && (
-                  <div className="mt-2 bg-blue-50 border border-blue-100 p-3 rounded-md">
-                    <div className="text-xs font-mono uppercase tracking-wide text-samsung-blue mb-1">Estimated Total ({estimatedTotal.days} days)</div>
-                    <div className="font-mono text-lg font-bold text-gray-900">{estimatedTotal.text}</div>
-                    <div className="text-xs text-gray-500 mt-1">Excludes flight/train tickets</div>
+                  <div className="mt-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 p-3 rounded-md">
+                    <div className="text-xs font-mono uppercase tracking-wide text-samsung-blue dark:text-blue-400 mb-1">Estimated Total ({estimatedTotal.days} days)</div>
+                    <div className="font-mono text-lg font-bold text-gray-900 dark:text-gray-100">{estimatedTotal.text}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Excludes flight/train tickets</div>
                   </div>
                 )}
               </div>
             ) : (
-              <p className="text-xs text-gray-500 italic bg-gray-50 p-3 rounded-md border border-border text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400 italic bg-gray-50 dark:bg-gray-800/50 p-3 rounded-md border border-border dark:border-gray-700 text-center">
                 Select a destination to view your per diem and hotel caps.
               </p>
             )}
@@ -480,16 +512,16 @@ export default function PreApproval() {
 
           {/* Recent Travel Context */}
           {recentTravel.length > 0 && (
-            <div className="bg-white p-6 rounded-lg border border-border shadow-sm">
-              <h3 className="text-sm font-semibold flex items-center gap-2 mb-4 text-gray-900 border-b border-border pb-2">
-                <PlaneTakeoff size={16} className="text-gray-400" /> Your recent Travel requests
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-border dark:border-gray-700 shadow-sm">
+              <h3 className="text-sm font-semibold flex items-center gap-2 mb-4 text-gray-900 dark:text-gray-100 border-b border-border dark:border-gray-700 pb-2">
+                <PlaneTakeoff size={16} className="text-gray-400 dark:text-gray-500" /> Your recent Travel requests
               </h3>
               <div className="flex flex-col gap-4">
                 {recentTravel.map(req => (
-                  <div key={req.id} className="flex justify-between items-start cursor-pointer hover:bg-gray-50 p-1 -mx-1 rounded" onClick={() => navigate(`/requests/${req.id}`)}>
+                  <div key={req.id} className="flex justify-between items-start cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 -mx-1 rounded" onClick={() => navigate(`/requests/${req.id}`)}>
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-medium text-gray-900 truncate max-w-[150px]" title={req.destination}>{req.destination}</span>
-                      <span className="text-xs text-gray-500">{formatDate(req.submittedAt)}</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px]" title={req.destination}>{req.destination}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(req.submittedAt)}</span>
                     </div>
                     {req.settlementStatus === 'approved' ? (
                       <CheckCircle size={16} className="text-status-approved mt-1" />

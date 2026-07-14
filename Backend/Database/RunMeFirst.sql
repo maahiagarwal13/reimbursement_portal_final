@@ -688,6 +688,15 @@ BEGIN
     ORDER BY UploadedAt DESC;
 END
 GO
+
+CREATE PROCEDURE sp_DeleteEmployeeFile
+    @Id UNIQUEIDENTIFIER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM EmployeeFiles WHERE Id = @Id;
+END
+GO
 -- ============================================================
 -- Reimbursement Portal — Seed Data (Normalized Schema)
 -- Target: Microsoft SQL Server 2019+
@@ -1151,7 +1160,14 @@ BEGIN
 
     -- 1. Insert Request
     INSERT INTO [dbo].[Requests] ([Id], [EmpId], [Type], [Title], [Status], [SubmittedAt])
-    VALUES (@Id, @EmpId, 'business-travel', @Title, 'pending', GETUTCDATE());
+    VALUES (@Id, @EmpId, 'travel', @Title, 'pending', GETUTCDATE());
+
+    -- Calculate days if NULL
+    IF @Days IS NULL
+    BEGIN
+        SET @Days = DATEDIFF(DAY, @StartDate, @EndDate) + 1;
+        IF @Days < 1 SET @Days = 1;
+    END
 
     -- 2. Insert TripRequests
     INSERT INTO [dbo].[TripRequests] ([RequestId], [Subtype], [Destination], [State], [Region], [Country], [StartDate], [EndDate], [Days], [Purpose], [TravelMode], [Stage])

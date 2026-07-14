@@ -1,8 +1,11 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 /* Base Layout shell */
 import BaseLayout from './components/Layout/BaseLayout';
+import GlobalLoader from './components/shared/GlobalLoader';
 
 /* Pages */
 import Login from './pages/Login';
@@ -15,6 +18,7 @@ import PolicyLimits from './pages/employee/PolicyLimits';
 import Internet from './pages/employee/Internet';
 import Carpool from './pages/employee/Carpool';
 import Relocation from './pages/employee/Relocation';
+import MyVault from './pages/employee/MyVault';
 
 /* Travel pages */
 import PreApproval from './pages/travel/PreApproval';
@@ -71,8 +75,11 @@ function RedirectIfAuth({ children }) {
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public */}
+    <ThemeProvider>
+      <LanguageProvider>
+        <GlobalLoader />
+        <Routes>
+          {/* Public */}
       <Route
         path="/login"
         element={
@@ -104,6 +111,7 @@ export default function App() {
         <Route path="requests/:id/settlement" element={<Settlement />} />
         <Route path="new-request/travel/extend/:id" element={<ExtendTrip />} />
         <Route path="policy" element={<PolicyLimits />} />
+        <Route path="my-vault" element={<MyVault />} />
 
         {/* Finance Access Group */}
         <Route
@@ -192,6 +200,8 @@ export default function App() {
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+        </Routes>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }

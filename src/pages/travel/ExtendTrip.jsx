@@ -68,9 +68,9 @@ export default function ExtendTrip() {
         ← Back to Request Details
       </button>
       
-      <div className="pb-4 border-b border-border bg-gradient-to-b from-blue-50/30 to-transparent -mx-6 px-6 pt-2 mb-2">
-        <h1 className="font-serif text-2xl font-semibold text-gray-900">Extend Business Trip</h1>
-        <p className="text-sm font-mono tracking-wide uppercase text-gray-500 mt-1">Request ID: {request.id}</p>
+      <div className="pb-4 border-b border-border dark:border-slate-700 bg-gradient-to-b from-blue-50/30 dark:from-slate-800/50 to-transparent -mx-6 px-6 pt-2 mb-2">
+        <h1 className="font-serif text-2xl font-semibold text-gray-900 dark:text-gray-100">Extend Business Trip</h1>
+        <p className="text-sm font-mono tracking-wide uppercase text-gray-500 dark:text-slate-400 mt-1">Request ID: {request.id}</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">

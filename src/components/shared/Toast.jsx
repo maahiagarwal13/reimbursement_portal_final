@@ -44,7 +44,7 @@ export default function Toast({ message, type = 'info', isVisible, onClose }) {
 
   const ariaRole = type === 'error' ? 'alert' : 'status';
   
-  let colorClass = 'bg-white text-gray-900 border-gray-200';
+  let colorClass = 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 shadow-lg';
   let iconColor = 'text-blue-500';
   
   if (type === 'success') {
@@ -68,7 +68,7 @@ export default function Toast({ message, type = 'info', isVisible, onClose }) {
         </div>
         <button
           type="button"
-          className="flex-shrink-0 rounded-md p-0.5 text-gray-400 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+          className="flex-shrink-0 rounded-md p-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
           onClick={onClose}
           aria-label="Dismiss notification"
         >

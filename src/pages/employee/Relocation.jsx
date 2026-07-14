@@ -18,6 +18,7 @@ export default function Relocation() {
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
   const [loading, setLoading] = useState(false);
   const [relocationBase, setRelocationBase] = useState(null);
+  const [relocationProofs, setRelocationProofs] = useState([]);
 
   const [relocationItems, setRelocationItems] = useState([{ component: 'Accommodation', claimedAmount: '' }]);
 
@@ -37,7 +38,21 @@ export default function Relocation() {
 
   useEffect(() => {
     async function loadDraft() {
-      if (draftId) {
+      // Check local storage first
+      const localDraftJson = localStorage.getItem(`draft_relocation_${draftId || 'new'}`);
+      if (localDraftJson) {
+        try {
+          const draft = JSON.parse(localDraftJson);
+          if (draft.draftData && draft.draftData.relocationItems) {
+            setRelocationItems(draft.draftData.relocationItems);
+          }
+          return;
+        } catch (err) {
+          console.error("Failed to parse local draft", err);
+        }
+      }
+
+      if (draftId && draftId !== 'new') {
         try {
           const draft = await getRequestById(draftId);
           if (draft && draft.stage === 'draft' && draft.draftData) {
@@ -55,12 +70,8 @@ export default function Relocation() {
 
   const handleSaveDraft = async () => {
     try {
-      await saveDraftRequest({
-        draftId,
-        ghrId: user.ghrId,
-        type: 'relocation',
-        draftData: { relocationItems }
-      });
+      const draft = { draftData: { relocationItems } };
+      localStorage.setItem(`draft_relocation_${draftId || 'new'}`, JSON.stringify(draft));
       setToast({ visible: true, message: 'Saved as draft', type: 'success' });
       navigate('/requests');
     } catch (err) {
@@ -81,6 +92,7 @@ export default function Relocation() {
         }))
       });
       setToast({ visible: true, message: 'Relocation request submitted successfully', type: 'success' });
+      localStorage.removeItem(`draft_relocation_${draftId || 'new'}`);
       setTimeout(() => navigate('/requests'), 1500);
     } catch (err) {
       setToast({ visible: true, message: err.message, type: 'error' });
@@ -97,18 +109,18 @@ export default function Relocation() {
         ← Back to request types
       </button>
       
-      <div className="pb-4 border-b border-border bg-gradient-to-b from-blue-50/30 to-transparent -mx-6 px-6 pt-2 mb-2">
-        <h1 className="font-serif text-2xl font-semibold text-gray-900">Relocation Reimbursement</h1>
-        <p className="text-sm font-mono tracking-wide uppercase text-gray-500 mt-1">Submit your relocation expenses for reimbursement</p>
+      <div className="pb-4 border-b border-border dark:border-slate-700 bg-gradient-to-b from-blue-50/30 dark:from-slate-800/50 to-transparent -mx-6 px-6 pt-2 mb-2">
+        <h1 className="font-serif text-2xl font-semibold text-gray-900 dark:text-gray-100">Relocation Reimbursement</h1>
+        <p className="text-sm font-mono tracking-wide uppercase text-gray-500 dark:text-slate-400 mt-1">Submit your relocation expenses for reimbursement</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Left Column: Form */}
-        <div className="flex-1 min-w-0 xl:col-span-9 bg-white rounded-lg shadow-sm border-t-4 border-samsung-blue border-l border-r border-b border-border">
-          <div className="px-6 md:px-8 py-5 border-b border-border flex justify-between items-center bg-gray-50/50">
-            <h2 className="text-base font-semibold text-gray-900 m-0">Relocation Details</h2>
-            <span className="text-xs font-mono uppercase tracking-wide text-gray-400">Draft auto-saved</span>
+        <div className="flex-1 min-w-0 xl:col-span-9 bg-white dark:bg-slate-800 rounded-lg shadow-sm border-t-4 border-samsung-blue dark:border-t-blue-500 border-l border-r border-b border-border dark:border-slate-700">
+          <div className="px-6 md:px-8 py-5 border-b border-border dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-700/50">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 m-0">Relocation Details</h2>
+            <span className="text-xs font-mono uppercase tracking-wide text-gray-400 dark:text-slate-400">Draft auto-saved</span>
           </div>
 
           <form onSubmit={handleRelocationSubmit} className="p-6 md:p-8 max-w-4xl">
@@ -135,25 +147,25 @@ export default function Relocation() {
                     }} required />
                   </div>
                   {idx > 0 && (
-                    <button type="button" onClick={() => setRelocationItems(relocationItems.filter((_, i) => i !== idx))} className="px-3 py-2 border border-red-200 text-status-rejected bg-red-50 hover:bg-red-100 rounded-md text-sm font-medium mb-1">
+                    <button type="button" onClick={() => setRelocationItems(relocationItems.filter((_, i) => i !== idx))} className="px-3 py-2 border border-red-200 dark:border-red-800 text-status-rejected dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md text-sm font-medium mb-1">
                       Remove
                     </button>
                   )}
                 </div>
               ))}
-              <button type="button" onClick={() => setRelocationItems([...relocationItems, { component: 'Accommodation', claimedAmount: '' }])} className="w-max px-4 py-2 border border-border text-gray-700 bg-white hover:bg-gray-50 rounded-md text-sm font-medium flex items-center gap-1">
+              <button type="button" onClick={() => setRelocationItems([...relocationItems, { component: 'Accommodation', claimedAmount: '' }])} className="w-max px-4 py-2 border border-border dark:border-slate-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 rounded-md text-sm font-medium flex items-center gap-1">
                 + Add Component
               </button>
               
               <div className="mt-4">
-                <UploadZone id="relocationProofs" label="Upload Proofs (Receipts, Invoices)" accept=".pdf,.png,.jpg" multiple required />
+                <UploadZone id="relocationProofs" label="Upload Proofs (Receipts, Invoices)" accept=".pdf,.png,.jpg" multiple required files={relocationProofs} onFilesChange={setRelocationProofs} />
               </div>
             </div>
             
-            <div className="mt-8 pt-6 border-t border-border flex justify-between items-center">
-              <button type="button" onClick={() => navigate('/new-request')} className="text-gray-600 hover:text-gray-900 font-medium text-sm">Cancel</button>
+            <div className="mt-8 pt-6 border-t border-border dark:border-slate-700 flex justify-between items-center">
+              <button type="button" onClick={() => navigate('/new-request')} className="text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium text-sm">Cancel</button>
               <div className="flex gap-3">
-                <button type="button" onClick={handleSaveDraft} className="px-6 py-2.5 rounded-md font-medium text-sm border border-border text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200">
+                <button type="button" onClick={handleSaveDraft} className="px-6 py-2.5 rounded-md font-medium text-sm border border-border dark:border-slate-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200">
                   Save as Draft
                 </button>
                 <button type="submit" disabled={loading} className="bg-samsung-blue text-white px-6 py-2.5 rounded-md font-medium text-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-samsung-blue disabled:opacity-70 disabled:cursor-not-allowed">
@@ -166,28 +178,28 @@ export default function Relocation() {
 
         {/* Right Column: Contextual Info */}
         <div className="w-full lg:w-[360px] shrink-0 xl:col-span-3 flex flex-col gap-6 sticky top-6">
-          <div className="bg-white p-6 rounded-lg border border-border shadow-sm">
-            <h3 className="text-base font-semibold flex items-center gap-2 mb-4 text-gray-900">
-              <Info size={18} className="text-samsung-blue" /> Policy Highlights
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-border dark:border-slate-700 shadow-sm">
+            <h3 className="text-base font-semibold flex items-center gap-2 mb-4 text-gray-900 dark:text-gray-100">
+              <Info size={18} className="text-samsung-blue dark:text-blue-400" /> Policy Highlights
             </h3>
             
-            <ul className="pl-5 list-disc text-gray-600 text-sm flex flex-col gap-3 mb-6 marker:text-samsung-blue">
-              <li>Your eligible base relocation allowance is <strong className="text-gray-900">₹{relocationBase?.toLocaleString('en-IN') || '50,000'}</strong>.</li>
+            <ul className="pl-5 list-disc text-gray-600 dark:text-slate-400 text-sm flex flex-col gap-3 mb-6 marker:text-samsung-blue dark:marker:text-blue-400">
+              <li>Your eligible base relocation allowance is <strong className="text-gray-900 dark:text-gray-100">₹{relocationBase?.toLocaleString('en-IN') || '50,000'}</strong>.</li>
               <li>Reimbursement applies only to actual expenses supported by original GST invoices.</li>
               <li>Accommodation claims are capped at 15 days of temporary stay.</li>
             </ul>
 
-            <h3 className="text-sm font-semibold flex items-center gap-2 mb-2 text-gray-900 border-t border-gray-100 pt-4">
-              <HelpCircle size={16} className="text-gray-400" /> FAQ
+            <h3 className="text-sm font-semibold flex items-center gap-2 mb-2 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-slate-700 pt-4">
+              <HelpCircle size={16} className="text-gray-400 dark:text-slate-500" /> FAQ
             </h3>
             <div className="flex flex-col gap-3">
               <div>
-                <p className="text-sm font-medium text-gray-800 mb-0.5">What proofs are required?</p>
-                <p className="text-xs text-gray-600">GST invoices for movers/packers, hotel receipts, and stamped brokerage agreements.</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-slate-200 mb-0.5">What proofs are required?</p>
+                <p className="text-xs text-gray-600 dark:text-slate-400">GST invoices for movers/packers, hotel receipts, and stamped brokerage agreements.</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-800 mb-0.5">Can I submit partially?</p>
-                <p className="text-xs text-gray-600">No, please submit all relocation expenses in a single comprehensive claim.</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-slate-200 mb-0.5">Can I submit partially?</p>
+                <p className="text-xs text-gray-600 dark:text-slate-400">No, please submit all relocation expenses in a single comprehensive claim.</p>
               </div>
             </div>
           </div>

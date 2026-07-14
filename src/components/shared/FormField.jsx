@@ -20,9 +20,9 @@ export default function FormField({
   const helpId = helpText ? `${id}-help` : undefined;
   const describedBy = [errorId, helpId].filter(Boolean).join(' ') || undefined;
   
-  const baseInputClass = `w-full px-3 py-2 border rounded-md text-sm text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-samsung-blue focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed ${
-    error ? 'border-status-rejected focus:ring-status-rejected' : 'border-border hover:border-gray-400'
-  } ${readOnly ? 'bg-gray-50' : ''}`;
+  const baseInputClass = `w-full px-3 py-2 border rounded-md text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-samsung-blue focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed ${
+    error ? 'border-status-rejected focus:ring-status-rejected' : 'border-border dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+  } ${readOnly ? 'bg-gray-50 dark:bg-gray-800/50' : ''}`;
 
   const commonProps = {
     id,
@@ -77,7 +77,7 @@ export default function FormField({
     <div className={`flex flex-col gap-1.5 ${className}`}>
       <label
         htmlFor={id}
-        className="font-mono text-[10px] uppercase tracking-wide font-semibold text-gray-700 flex items-center gap-1"
+        className="font-mono text-[10px] uppercase tracking-wide font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1"
       >
         {label}
         {required && <span className="text-status-rejected" aria-hidden="true">*</span>}
@@ -92,7 +92,7 @@ export default function FormField({
       )}
 
       {helpText && !error && (
-        <span id={helpId} className="text-xs text-gray-500">
+        <span id={helpId} className="text-xs text-gray-500 dark:text-gray-400">
           {helpText}
         </span>
       )}

@@ -50,8 +50,10 @@ export const submitSettlement = async (id, dto) => {
 export const createInternetRequest = async (dto) => {
   const payload = {
     provider: dto.provider,
-    frequency: "Monthly",
-    periods: dto.months.map(m => ({ periodLabel: m.month, amount: m.amount }))
+    frequency: dto.frequency,
+    totalAmount: dto.totalAmount,
+    claimableAmount: dto.claimableAmount,
+    periods: dto.periods
   };
   return post(`/api/requests/internet/${dto.ghrId}`, payload);
 };
@@ -73,14 +75,15 @@ export const createCarpoolRequest = async (dto) => {
 
 export const createRelocationRequest = async (dto) => {
   const payload = {
-    fromCity: dto.fromCity,
-    toCity: dto.toCity,
-    relocDate: dto.relocationDate,
-    expenses: Object.entries(dto.components).map(([key, val]) => ({
-      category: key,
-      amount: val,
+    fromCity: dto.fromCity || "Unknown",
+    toCity: dto.toCity || "Unknown",
+    relocDate: dto.relocationDate || new Date().toISOString(),
+    totalAmount: dto.relocationLineItems ? dto.relocationLineItems.reduce((sum, item) => sum + item.claimedAmount, 0) : 0,
+    expenses: dto.relocationLineItems ? dto.relocationLineItems.map(item => ({
+      category: item.component.toLowerCase(),
+      amount: item.claimedAmount,
       hasBillDocument: false
-    }))
+    })) : []
   };
   return post(`/api/requests/relocation/${dto.ghrId}`, payload);
 };

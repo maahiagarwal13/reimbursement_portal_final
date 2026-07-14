@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-background: #FAF9F6;
   --color-samsung-blue: #1428A0;
@@ -14,7 +16,7 @@
 
 @layer base {
   body {
-    @apply bg-background text-gray-800 font-sans antialiased;
+    @apply bg-background text-gray-800 font-sans antialiased dark:bg-gray-900 dark:text-gray-100;
   }
   
   /* Strict enforcement of NO animations/transitions */

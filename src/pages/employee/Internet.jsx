@@ -41,7 +41,27 @@ export default function Internet() {
 
   useEffect(() => {
     async function loadDraft() {
-      if (draftId) {
+      // Check local storage first
+      const localDraftJson = localStorage.getItem(`draft_internet_${draftId || 'new'}`);
+      if (localDraftJson) {
+        try {
+          const draft = JSON.parse(localDraftJson);
+          if (draft.draftData) {
+            setStep(draft.draftData.step || 1);
+            setProvider(draft.draftData.provider || '');
+            setFrequency(draft.draftData.frequency || 'monthly');
+            setDuration(draft.draftData.duration || 1);
+            if (draft.draftData.periods) {
+              setPeriods(draft.draftData.periods);
+            }
+          }
+          return;
+        } catch (err) {
+          console.error("Failed to parse local draft", err);
+        }
+      }
+
+      if (draftId && draftId !== 'new') {
         try {
           const draft = await getRequestById(draftId);
           if (draft && draft.stage === 'draft' && draft.draftData) {
@@ -109,12 +129,8 @@ export default function Internet() {
 
   const handleSaveDraft = async () => {
     try {
-      await saveDraftRequest({
-        draftId,
-        ghrId: user.ghrId,
-        type: 'internet-bill',
-        draftData: { step, provider, frequency, duration, periods }
-      });
+      const draft = { draftData: { step, provider, frequency, duration, periods } };
+      localStorage.setItem(`draft_internet_${draftId || 'new'}`, JSON.stringify(draft));
       setToast({ visible: true, message: 'Saved as draft', type: 'success' });
       navigate('/requests');
     } catch (err) {
@@ -141,6 +157,7 @@ export default function Internet() {
         }))
       });
       setToast({ visible: true, message: 'Internet request submitted successfully', type: 'success' });
+      localStorage.removeItem(`draft_internet_${draftId || 'new'}`);
       setTimeout(() => navigate('/requests'), 1500);
     } catch (err) {
       console.error(err);
@@ -159,24 +176,24 @@ export default function Internet() {
         ← Back to request types
       </button>
       
-      <div className="pb-4 border-b border-border bg-gradient-to-b from-blue-50/30 to-transparent -mx-6 px-6 pt-2 mb-2">
-        <h1 className="font-serif text-2xl font-semibold text-gray-900">Internet Bill Reimbursement</h1>
-        <p className="text-sm font-mono tracking-wide uppercase text-gray-500 mt-1">Step {step} of 2: {step === 1 ? 'Submit your internet bills' : 'Review Submission'}</p>
+      <div className="pb-4 border-b border-border dark:border-slate-700 bg-gradient-to-b from-blue-50/30 dark:from-slate-800/50 to-transparent -mx-6 px-6 pt-2 mb-2">
+        <h1 className="font-serif text-2xl font-semibold text-gray-900 dark:text-gray-100">Internet Bill Reimbursement</h1>
+        <p className="text-sm font-mono tracking-wide uppercase text-gray-500 dark:text-slate-400 mt-1">Step {step} of 2: {step === 1 ? 'Submit your internet bills' : 'Review Submission'}</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Left Column: Form */}
-        <div className="flex-1 min-w-0 xl:col-span-9 bg-white rounded-lg shadow-sm border-t-4 border-samsung-blue border-l border-r border-b border-border">
-          <div className="px-6 md:px-8 py-5 border-b border-border flex justify-between items-center bg-gray-50/50">
-            <h2 className="text-base font-semibold text-gray-900 m-0">Request Details</h2>
-            <span className="text-xs font-mono uppercase tracking-wide text-gray-400">Draft auto-saved</span>
+        <div className="flex-1 min-w-0 xl:col-span-9 bg-white dark:bg-slate-800 rounded-lg shadow-sm border-t-4 border-samsung-blue dark:border-t-blue-500 border-l border-r border-b border-border dark:border-slate-700">
+          <div className="px-6 md:px-8 py-5 border-b border-border dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-700/50">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 m-0">Request Details</h2>
+            <span className="text-xs font-mono uppercase tracking-wide text-gray-400 dark:text-slate-400">Draft auto-saved</span>
           </div>
 
           <div className="p-6 md:p-8 max-w-4xl">
             {step === 1 && (
               <form onSubmit={handleNext}>
-                <div className="bg-blue-50 text-samsung-blue px-4 py-3 rounded-md text-sm mb-6 flex items-start gap-3 border border-blue-100">
+                <div className="bg-blue-50 dark:bg-blue-900/30 text-samsung-blue dark:text-blue-400 px-4 py-3 rounded-md text-sm mb-6 flex items-start gap-3 border border-blue-100 dark:border-blue-800">
                   <span className="font-semibold mt-0.5">ⓘ</span>
                   <div>
                     Your internet reimbursement cap ({user.cl}): <strong>{formatINR(cap)} per month</strong>
@@ -185,10 +202,10 @@ export default function Internet() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-gray-700">Internet Provider <span className="text-red-500">*</span></label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Internet Provider <span className="text-red-500">*</span></label>
                     <input 
                       type="text" 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-samsung-blue focus:border-samsung-blue text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-samsung-blue focus:border-samsung-blue text-sm dark:bg-slate-700 dark:text-gray-100"
                       placeholder="e.g. Airtel Broadband" 
                       value={provider} 
                       onChange={e => setProvider(e.target.value)} 
@@ -196,9 +213,9 @@ export default function Internet() {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-gray-700">Billing Frequency <span className="text-red-500">*</span></label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Billing Frequency <span className="text-red-500">*</span></label>
                     <select 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-samsung-blue focus:border-samsung-blue text-sm bg-white"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-samsung-blue focus:border-samsung-blue text-sm bg-white dark:bg-slate-700 dark:text-gray-100"
                       value={frequency} 
                       onChange={e => setFrequency(e.target.value)}
                     >
@@ -212,9 +229,9 @@ export default function Internet() {
 
                 {frequency !== 'yearly' && (
                   <div className="flex flex-col gap-1.5 mb-6 max-w-xs">
-                    <label className="text-sm font-medium text-gray-700">Number of Periods <span className="text-red-500">*</span></label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Number of Periods <span className="text-red-500">*</span></label>
                     <select 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-samsung-blue focus:border-samsung-blue text-sm bg-white"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-samsung-blue focus:border-samsung-blue text-sm bg-white dark:bg-slate-700 dark:text-gray-100"
                       value={duration} 
                       onChange={e => setDuration(parseInt(e.target.value))}
                     >
@@ -225,18 +242,18 @@ export default function Internet() {
                   </div>
                 )}
 
-                <h3 className="text-sm font-semibold mb-4 text-gray-900 border-b border-border pb-2">Bill Breakdown</h3>
+                <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-gray-100 border-b border-border dark:border-slate-700 pb-2">Bill Breakdown</h3>
                 <div className="flex flex-col gap-4 mb-6">
                   {periods.map((p, i) => (
-                    <div key={i} className="bg-gray-50 p-4 rounded-md border border-border">
-                      <div className="font-medium text-sm text-samsung-blue mb-3">{p.label}</div>
+                    <div key={i} className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-md border border-border dark:border-slate-600">
+                      <div className="font-medium text-sm text-samsung-blue dark:text-blue-400 mb-3">{p.label}</div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-sm font-medium text-gray-700">Bill Amount (₹) <span className="text-red-500">*</span></label>
+                          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Bill Amount (₹) <span className="text-red-500">*</span></label>
                           <input 
                             type="number" 
                             min="0"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-samsung-blue focus:border-samsung-blue text-sm"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-samsung-blue focus:border-samsung-blue text-sm dark:bg-slate-700 dark:text-gray-100"
                             placeholder="0" 
                             value={p.amount} 
                             onChange={e => handlePeriodChange(i, 'amount', e.target.value)} 
@@ -244,35 +261,35 @@ export default function Internet() {
                           />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-sm font-medium text-gray-700">Upload Bill <span className="text-red-500">*</span></label>
-                          <UploadZone id={`bill-${i}`} accept=".pdf,.png,.jpg" onFile={f => handlePeriodChange(i, 'file', f)} />
+                          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Upload Bill <span className="text-red-500">*</span></label>
+                          <UploadZone id={`bill-${i}`} accept=".pdf,.png,.jpg" files={p.file ? [p.file] : []} onFilesChange={files => handlePeriodChange(i, 'file', files.length > 0 ? files[0] : null)} />
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="border-t border-gray-200 pt-4 mb-6">
+                <div className="border-t border-gray-200 dark:border-slate-700 pt-4 mb-6">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600 text-sm">Total Billed Amount</span>
-                    <strong className="text-base text-gray-900">{formatINR(totalAmount)}</strong>
+                    <span className="text-gray-600 dark:text-slate-400 text-sm">Total Billed Amount</span>
+                    <strong className="text-base text-gray-900 dark:text-gray-100">{formatINR(totalAmount)}</strong>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600 text-sm">Eligible Claim Amount (Cap: {formatINR(maxAllowed)})</span>
-                    <strong className="text-lg text-samsung-blue font-semibold">{formatINR(claimable)}</strong>
+                    <span className="text-gray-600 dark:text-slate-400 text-sm">Eligible Claim Amount (Cap: {formatINR(maxAllowed)})</span>
+                    <strong className="text-lg text-samsung-blue dark:text-blue-400 font-semibold">{formatINR(claimable)}</strong>
                   </div>
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm mb-4 border border-red-200">
+                  <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-3 rounded-md text-sm mb-4 border border-red-200 dark:border-red-800">
                     Please fill all required fields and upload all bill documents.
                   </div>
                 )}
                 
-                <div className="mt-8 pt-6 border-t border-border flex justify-between items-center">
-                  <button type="button" onClick={() => navigate('/new-request')} className="text-gray-600 hover:text-gray-900 font-medium text-sm">Cancel</button>
+                <div className="mt-8 pt-6 border-t border-border dark:border-slate-700 flex justify-between items-center">
+                  <button type="button" onClick={() => navigate('/new-request')} className="text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium text-sm">Cancel</button>
                   <div className="flex gap-3">
-                    <button type="button" onClick={handleSaveDraft} className="px-6 py-2.5 rounded-md font-medium text-sm border border-border text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200">
+                    <button type="button" onClick={handleSaveDraft} className="px-6 py-2.5 rounded-md font-medium text-sm border border-border dark:border-slate-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200">
                       Save as Draft
                     </button>
                     <button type="submit" className="bg-samsung-blue text-white px-6 py-2.5 rounded-md font-medium text-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-samsung-blue">
@@ -285,38 +302,38 @@ export default function Internet() {
 
             {step === 2 && (
               <div>
-                <div className="bg-gray-50 p-6 rounded-md border border-border mb-6">
+                <div className="bg-gray-50 dark:bg-slate-700/50 p-6 rounded-md border border-border dark:border-slate-700 mb-6">
                   <div className="grid grid-cols-2 gap-y-4 text-sm">
-                    <div className="text-gray-500">Provider:</div>
-                    <div className="font-medium text-gray-900">{provider}</div>
-                    <div className="text-gray-500">Frequency:</div>
-                    <div className="font-medium text-gray-900 capitalize">{frequency} ({periods.length} periods)</div>
-                    <div className="text-gray-500">Total Billed:</div>
-                    <div className="font-medium text-gray-900">{formatINR(totalAmount)}</div>
-                    <div className="text-gray-500">Eligible Claim:</div>
-                    <div className="font-medium text-samsung-blue">{formatINR(claimable)}</div>
+                    <div className="text-gray-500 dark:text-slate-400">Provider:</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{provider}</div>
+                    <div className="text-gray-500 dark:text-slate-400">Frequency:</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100 capitalize">{frequency} ({periods.length} periods)</div>
+                    <div className="text-gray-500 dark:text-slate-400">Total Billed:</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">{formatINR(totalAmount)}</div>
+                    <div className="text-gray-500 dark:text-slate-400">Eligible Claim:</div>
+                    <div className="font-medium text-samsung-blue dark:text-blue-400">{formatINR(claimable)}</div>
                   </div>
                 </div>
 
-                <h3 className="text-sm font-semibold mb-3 text-gray-900">Breakdown</h3>
+                <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">Breakdown</h3>
                 <div className="flex flex-col gap-2 mb-8">
                   {periods.map((p, i) => (
-                    <div key={i} className="flex justify-between items-center bg-white p-3 rounded-md border border-gray-200 shadow-sm">
+                    <div key={i} className="flex justify-between items-center bg-white dark:bg-slate-700/50 p-3 rounded-md border border-gray-200 dark:border-slate-600 shadow-sm">
                       <div>
-                        <div className="font-medium text-sm text-gray-900">{p.label}</div>
-                        <div className="text-xs text-gray-500 mt-1">{p.file?.name}</div>
+                        <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{p.label}</div>
+                        <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">{p.file?.name}</div>
                       </div>
-                      <div className="font-medium text-sm text-gray-900">{formatINR(p.amount)}</div>
+                      <div className="font-medium text-sm text-gray-900 dark:text-gray-100">{formatINR(p.amount)}</div>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-border flex justify-between items-center">
-                  <button onClick={() => setStep(1)} className="text-gray-600 hover:text-gray-900 font-medium text-sm">
+                <div className="mt-8 pt-6 border-t border-border dark:border-slate-700 flex justify-between items-center">
+                  <button onClick={() => setStep(1)} className="text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium text-sm">
                     ← Back to Edit
                   </button>
                   <div className="flex gap-3">
-                    <button type="button" onClick={handleSaveDraft} className="btn btn--secondary btn--md">
+                    <button type="button" onClick={handleSaveDraft} className="px-6 py-2.5 rounded-md font-medium text-sm border border-border dark:border-slate-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200">
                       Save as Draft
                     </button>
                     <button onClick={handleSubmit} disabled={loading} className="bg-samsung-blue text-white px-6 py-2.5 rounded-md font-medium text-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-samsung-blue disabled:opacity-70 disabled:cursor-not-allowed">
@@ -331,26 +348,26 @@ export default function Internet() {
 
         {/* Right Column: Contextual Info */}
         <div className="w-full lg:w-[360px] shrink-0 xl:col-span-3 flex flex-col gap-6 sticky top-6">
-          <div className="bg-white p-6 rounded-lg border border-border shadow-sm">
-            <h3 className="text-base font-semibold flex items-center gap-2 mb-4 text-gray-900">
-              <Info size={18} className="text-samsung-blue" /> Policy Highlights
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-border dark:border-slate-700 shadow-sm">
+            <h3 className="text-base font-semibold flex items-center gap-2 mb-4 text-gray-900 dark:text-gray-100">
+              <Info size={18} className="text-samsung-blue dark:text-blue-400" /> Policy Highlights
             </h3>
             
-            <ul className="pl-5 list-disc text-gray-600 text-sm flex flex-col gap-3 mb-6 marker:text-samsung-blue">
-              <li>Reimbursement is limited to your monthly cap of <strong className="text-gray-900">{formatINR(cap)}</strong>.</li>
+            <ul className="pl-5 list-disc text-gray-600 dark:text-slate-400 text-sm flex flex-col gap-3 mb-6 marker:text-samsung-blue dark:marker:text-blue-400">
+              <li>Reimbursement is limited to your monthly cap of <strong className="text-gray-900 dark:text-gray-100">{formatINR(cap)}</strong>.</li>
               <li>Only broadband or mobile data plans used explicitly for remote work are eligible.</li>
               <li>You must attach a valid tax invoice (bill) for every period you are claiming.</li>
             </ul>
 
-            <h3 className="text-sm font-semibold flex items-center gap-2 mb-2 text-gray-900 border-t border-gray-100 pt-4">
-              <HelpCircle size={16} className="text-gray-400" /> FAQ
+            <h3 className="text-sm font-semibold flex items-center gap-2 mb-2 text-gray-900 dark:text-gray-100 border-t border-gray-100 dark:border-slate-700 pt-4">
+              <HelpCircle size={16} className="text-gray-400 dark:text-slate-500" /> FAQ
             </h3>
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-gray-800 mb-0.5">Can I claim a prepaid plan?</p>
-              <p className="text-xs text-gray-600 mb-2">Yes, provided you have a valid receipt/invoice from the provider.</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-slate-200 mb-0.5">Can I claim a prepaid plan?</p>
+              <p className="text-xs text-gray-600 dark:text-slate-400 mb-2">Yes, provided you have a valid receipt/invoice from the provider.</p>
               
-              <p className="text-sm font-medium text-gray-800 mb-0.5">What if my bill exceeds the cap?</p>
-              <p className="text-xs text-gray-600">You will only be reimbursed up to your limit. The portal automatically calculates the eligible amount.</p>
+              <p className="text-sm font-medium text-gray-800 dark:text-slate-200 mb-0.5">What if my bill exceeds the cap?</p>
+              <p className="text-xs text-gray-600 dark:text-slate-400">You will only be reimbursed up to your limit. The portal automatically calculates the eligible amount.</p>
             </div>
           </div>
         </div>

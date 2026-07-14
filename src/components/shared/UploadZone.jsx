@@ -1,6 +1,7 @@
 import React, { useRef, useState, useCallback } from 'react';
-import { Upload, File, X, Eye } from 'lucide-react';
+import { Upload, File, X, Eye, Cloud } from 'lucide-react';
 import FilePreviewModal from './FilePreviewModal';
+import VaultSelectModal from './VaultSelectModal';
 
 export default function UploadZone({
   label,
@@ -14,6 +15,7 @@ export default function UploadZone({
   const inputRef = useRef(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [previewFile, setPreviewFile] = useState(null);
+  const [showVaultModal, setShowVaultModal] = useState(false);
 
   const handleFiles = useCallback(
     (newFiles) => {
@@ -82,7 +84,7 @@ export default function UploadZone({
     <div className="flex flex-col gap-2">
       <label
         htmlFor={id}
-        className="font-mono text-[10px] uppercase tracking-wide font-semibold text-gray-700 flex items-center gap-1"
+        className="font-mono text-[10px] uppercase tracking-wide font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1"
       >
         {label}
         {required && <span className="text-status-rejected" aria-hidden="true">*</span>}
@@ -91,8 +93,8 @@ export default function UploadZone({
       {/* Only show dropzone if empty, OR if multiple is allowed */}
       {(!files.length || multiple) && (
         <div
-          className={`relative flex flex-col items-center justify-center p-3 border-2 border-dashed rounded-lg bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-samsung-blue focus:ring-offset-2 ${
-            isDragOver ? 'border-samsung-blue bg-blue-50/50' : 'border-border hover:border-gray-400 hover:bg-gray-100/50'
+          className={`relative flex flex-col items-center justify-center p-3 border-2 border-dashed rounded-lg bg-gray-50 dark:bg-gray-900 cursor-pointer focus:outline-none focus:ring-2 focus:ring-samsung-blue focus:ring-offset-2 ${
+            isDragOver ? 'border-samsung-blue bg-blue-50/50 dark:bg-blue-900/40' : 'border-border dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-100/50 dark:hover:bg-gray-800'
           } ${files.length > 0 ? 'py-3' : ''}`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -105,20 +107,38 @@ export default function UploadZone({
         >
           {files.length === 0 && (
             <>
-              <Upload className="text-gray-400 mb-2" size={20} aria-hidden="true" />
-              <p className="text-xs text-gray-700 mb-1">
+              <Upload className="text-gray-400 dark:text-gray-500 mb-2" size={20} aria-hidden="true" />
+              <p className="text-xs text-gray-700 dark:text-gray-300 mb-1">
                 <span className="font-semibold text-samsung-blue">Click to upload</span> or drag and drop
               </p>
-              <p className="font-mono text-[9px] uppercase tracking-wide text-gray-500">
+              <p className="font-mono text-[9px] uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">
                 Accepted formats: {accept.replace(/\./g, '').toUpperCase().replace(/,/g, ', ')}
               </p>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setShowVaultModal(true); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-samsung-blue dark:text-blue-400 text-xs font-medium rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+              >
+                <Cloud size={14} />
+                Choose from Vault
+              </button>
             </>
           )}
 
           {files.length > 0 && (
-            <p className="text-sm text-gray-700">
-              <span className="font-semibold text-samsung-blue">Click to add more files</span> or drag and drop
-            </p>
+            <div className="flex flex-col items-center">
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                <span className="font-semibold text-samsung-blue dark:text-blue-400">Click to add more files</span> or drag and drop
+              </p>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setShowVaultModal(true); }}
+                className="flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                <Cloud size={12} />
+                Or select from Vault
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -140,35 +160,37 @@ export default function UploadZone({
         <div className="flex flex-col gap-2 mt-2" role="list" aria-label="Uploaded files">
           {files.map((file, index) => (
             <div 
-              className="flex items-center justify-between p-3 border border-border rounded-md bg-white shadow-sm hover:border-blue-300 transition-colors cursor-pointer group" 
+              className="flex items-center justify-between p-3 border border-border dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 shadow-sm hover:border-blue-300 dark:hover:border-blue-700 transition-colors cursor-pointer group" 
               key={`${file.name}-${index}`} 
               role="listitem"
               onClick={() => setPreviewFile(file)}
             >
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-8 h-8 flex-shrink-0 bg-blue-50 text-samsung-blue rounded flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                <div className="w-8 h-8 flex-shrink-0 bg-blue-50 dark:bg-blue-900/30 text-samsung-blue dark:text-blue-400 rounded flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors">
                   <File size={16} aria-hidden="true" />
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-sm font-medium text-gray-900 truncate group-hover:text-samsung-blue transition-colors" title={file.name}>{file.name}</span>
-                  <span className="font-mono text-[10px] uppercase tracking-wide text-gray-500">{formatSize(file.size)}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-samsung-blue dark:group-hover:text-blue-400 transition-colors" title={file.name}>{file.name}</span>
+                  <span className="font-mono text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">{formatSize(file.size)}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  className="flex-shrink-0 p-1.5 text-gray-400 hover:text-samsung-blue hover:bg-blue-50 rounded-md"
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     setPreviewFile(file);
                   }}
+                  className="p-1.5 text-gray-400 hover:text-samsung-blue dark:hover:text-blue-400 transition-colors bg-white dark:bg-gray-800 rounded-md"
                   aria-label={`Preview ${file.name}`}
+                  title="Preview document"
                 >
                   <Eye size={16} />
                 </button>
                 <button
                   type="button"
-                  className="flex-shrink-0 p-1.5 text-gray-400 hover:text-status-rejected hover:bg-red-50 rounded-md"
+                  className="flex-shrink-0 p-1.5 text-gray-400 hover:text-status-rejected hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemove(index);
@@ -185,6 +207,16 @@ export default function UploadZone({
 
       {previewFile && (
         <FilePreviewModal file={previewFile} onClose={() => setPreviewFile(null)} />
+      )}
+
+      {showVaultModal && (
+        <VaultSelectModal 
+          multiple={multiple} 
+          onClose={() => setShowVaultModal(false)}
+          onSelect={(selectedFiles) => {
+            handleFiles(selectedFiles);
+          }}
+        />
       )}
     </div>
   );

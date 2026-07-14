@@ -85,8 +85,8 @@ export default function Combobox({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const baseInputClass = `w-full px-3 py-2 border rounded-md text-sm text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-samsung-blue focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed pr-10 ${
-    error ? 'border-status-rejected focus:ring-status-rejected' : 'border-border hover:border-gray-400'
+  const baseInputClass = `w-full px-3 py-2 border rounded-md text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-samsung-blue focus:border-transparent disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed pr-10 ${
+    error ? 'border-status-rejected focus:ring-status-rejected' : 'border-border dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
   }`;
 
   return (
@@ -94,7 +94,7 @@ export default function Combobox({
       <label
         id={`${id}-label`}
         htmlFor={id}
-        className="font-mono text-[10px] uppercase tracking-wide font-semibold text-gray-700 flex items-center gap-1"
+        className="font-mono text-[10px] uppercase tracking-wide font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1"
       >
         {label}
         {required && <span className="text-status-rejected" aria-hidden="true">*</span>}
@@ -138,7 +138,7 @@ export default function Combobox({
               if (!isOpen) inputRef.current?.focus();
             }
           }}
-          className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-500 hover:text-gray-700"
+          className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           tabIndex={-1}
         >
           <ChevronDown size={16} />
@@ -148,11 +148,11 @@ export default function Combobox({
         {isOpen && (
           <ul
             id={`${id}-listbox`}
-            className="absolute z-10 w-full mt-1 bg-white border border-border rounded-md shadow-lg max-h-64 overflow-auto text-sm focus:outline-none"
+            className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-border dark:border-gray-600 rounded-md shadow-lg max-h-64 overflow-auto text-sm focus:outline-none"
             role="listbox"
           >
             {filteredOptions.length === 0 ? (
-              <li className="px-3 py-2 text-gray-500 text-sm italic select-none">No options found.</li>
+              <li className="px-3 py-2 text-gray-500 dark:text-gray-400 text-sm italic select-none">No options found.</li>
             ) : (
               filteredOptions.map((opt, index) => {
                 const isSelected = opt.value === value;
@@ -165,7 +165,7 @@ export default function Combobox({
                     onClick={() => handleSelect(opt.value)}
                     onMouseEnter={() => setHighlightedIndex(index)}
                     className={`px-3 py-2 cursor-pointer flex items-center justify-between select-none ${
-                      isHighlighted ? 'bg-blue-50 text-samsung-blue' : 'text-gray-900 hover:bg-gray-50'
+                      isHighlighted ? 'bg-blue-50 dark:bg-blue-900/30 text-samsung-blue dark:text-blue-400' : 'text-gray-900 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
                     <span className={isSelected ? 'font-medium' : 'font-normal'}>{opt.label}</span>

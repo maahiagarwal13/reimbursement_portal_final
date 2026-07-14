@@ -66,12 +66,12 @@ export default function DataTable({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-border">
+            <tr className="border-b border-border dark:border-gray-700">
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`py-3 px-4 font-mono text-[10px] uppercase tracking-wide text-gray-500 whitespace-nowrap select-none ${
-                    col.sortable ? 'cursor-pointer hover:text-gray-800' : ''
+                  className={`py-3 px-4 font-mono text-[10px] uppercase tracking-wide text-gray-500 dark:text-slate-400 whitespace-nowrap select-none ${
+                    col.sortable ? 'cursor-pointer hover:text-gray-800 dark:hover:text-slate-200' : ''
                   } ${col.isNumeric ? 'text-right' : ''}`}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
                 >
@@ -91,7 +91,7 @@ export default function DataTable({
             {paginatedData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="py-12">
-                  <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
+                  <div className="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 gap-2">
                     <FileX size={32} />
                     <p className="text-sm">{emptyMessage}</p>
                   </div>
@@ -103,13 +103,13 @@ export default function DataTable({
                 return (
                   <tr
                     key={row.id ?? rowIdx}
-                    className={`border-b border-border last:border-0 ${
-                      onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''
+                    className={`border-b border-border dark:border-slate-700 last:border-0 ${
+                      onRowClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50' : ''
                     } ${customClass}`}
                     onClick={onRowClick ? () => onRowClick(row) : undefined}
                   >
                     {columns.map((col) => (
-                      <td key={col.key} className={`py-3 px-4 text-sm text-gray-800 ${col.isNumeric ? 'text-right font-mono font-medium' : ''}`}>
+                      <td key={col.key} className={`py-3 px-4 text-sm text-gray-800 dark:text-slate-300 ${col.isNumeric ? 'text-right font-mono font-medium' : ''}`}>
                         {col.render ? col.render(row[col.key], row) : row[col.key]}
                       </td>
                     ))}
@@ -122,13 +122,13 @@ export default function DataTable({
       </div>
 
       {pagination && sortedData.length > 0 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-          <span className="text-xs text-gray-500 font-mono tracking-wide uppercase">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border dark:border-gray-700">
+          <span className="text-xs text-gray-500 dark:text-gray-400 font-mono tracking-wide uppercase">
             Showing {startItem} to {endItem} of {sortedData.length}
           </span>
           <div className="flex items-center gap-1">
             <button
-              className="p-1 rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-1 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
             >
@@ -140,7 +140,7 @@ export default function DataTable({
                 className={`w-7 h-7 rounded-md text-xs font-mono flex items-center justify-center ${
                   page === currentPage
                     ? 'bg-samsung-blue text-white font-medium'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
                 onClick={() => setCurrentPage(page)}
               >
@@ -148,7 +148,7 @@ export default function DataTable({
               </button>
             ))}
             <button
-              className="p-1 rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-1 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >

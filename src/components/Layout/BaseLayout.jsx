@@ -11,7 +11,8 @@ import {
   Globe,
   Truck,
   Car,
-  Wifi
+  Wifi,
+  Cloud
 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
@@ -28,6 +29,7 @@ export default function BaseLayout() {
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/new-request', icon: Plus, label: 'New Request' },
     { to: '/requests', icon: FileText, label: 'My Requests' },
+    { to: '/my-vault', icon: Cloud, label: 'My Vault' },
     { to: '/policy', icon: BookOpen, label: 'Policy & Limits' },
   ];
 
@@ -66,7 +68,7 @@ export default function BaseLayout() {
         department={user?.department || ''}
         onLogout={logout}
       />
-      <main className={`pt-14 min-h-screen bg-background ${isCollapsed ? 'ml-[72px]' : 'ml-[260px]'}`}>
+      <main className={`pt-14 min-h-screen bg-background dark:bg-gray-900 ${isCollapsed ? 'ml-[72px]' : 'ml-[260px]'}`}>
         <Outlet />
       </main>
     </>
