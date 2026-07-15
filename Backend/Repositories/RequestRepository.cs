@@ -61,6 +61,8 @@ public class RequestRepository : IRequestRepository
         
         var relocRequests = (await multi.ReadAsync<RelocationRequestDto>()).ToList();
         var relocExpenses = (await multi.ReadAsync<RelocationExpenseDto>()).ToList();
+        
+        var carpoolReqs = (await multi.ReadAsync<CarpoolRequestDto>()).ToList();
 
         // 1. Build TripRequest hierarchy
         var conveyancesBySettlement = localConveyances.GroupBy(x => x.SettlementId).ToDictionary(g => g.Key, g => g.ToList());
@@ -101,17 +103,23 @@ public class RequestRepository : IRequestRepository
             if (expensesByReloc.TryGetValue(rr.Id, out var ex)) rr.Expenses = ex;
         }
 
+
+
         // 5. Attach to Master Requests
         var tripReqsByReqId = tripRequests.ToDictionary(tr => tr.RequestId);
         var internetBillsByReqId = internetBills.ToDictionary(ib => ib.RequestId);
         var carpoolGroupsByReqId = carpoolGroups.ToDictionary(cg => cg.RequestId);
         var relocRequestsByReqId = relocRequests.ToDictionary(rr => rr.RequestId);
+        var carpoolReqsByReqId = carpoolReqs.ToDictionary(cr => cr.RequestId);
 
         foreach (var r in requests)
         {
             if (r.Type == "travel" && tripReqsByReqId.TryGetValue(r.Id, out var tr)) r.TripRequest = tr;
             else if (r.Type == "internet-bill" && internetBillsByReqId.TryGetValue(r.Id, out var ib)) r.InternetBillRequest = ib;
-            else if (r.Type == "carpool" && carpoolGroupsByReqId.TryGetValue(r.Id, out var cg)) r.CarpoolGroup = cg;
+            else if (r.Type == "carpool") {
+                if (carpoolGroupsByReqId.TryGetValue(r.Id, out var cg)) r.CarpoolGroup = cg;
+                if (carpoolReqsByReqId.TryGetValue(r.Id, out var cr)) r.CarpoolRequest = cr;
+            }
             else if (r.Type == "relocation" && relocRequestsByReqId.TryGetValue(r.Id, out var rr)) r.RelocationRequest = rr;
         }
 
@@ -189,6 +197,22 @@ public class RequestRepository : IRequestRepository
         }, commandType: CommandType.StoredProcedure);
     }
 
+    public async Task CreateCarpoolReimbursementAsync(RequestDto req, CarpoolRequestDto dto)
+    {
+        using var conn = _factory.CreateConnection();
+        await conn.ExecuteAsync("sp_CreateCarpoolReimbursement", new
+        {
+            Id = req.Id,
+            EmpId = req.EmpId,
+            Title = req.Title,
+            ReimbursementType = dto.ReimbursementType,
+            ExcelFileId = dto.ExcelFileId,
+            MapScreenshotId = dto.MapScreenshotId,
+            FuelProofId = dto.FuelProofId,
+            UserFuelRate = dto.UserFuelRate,
+            TotalAmount = dto.TotalAmount
+        }, commandType: CommandType.StoredProcedure);
+    }
     public async Task CreateRelocationRequestAsync(RequestDto req, RelocationRequestDto dto)
     {
         using var conn = _factory.CreateConnection();

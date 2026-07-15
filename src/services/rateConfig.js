@@ -25,7 +25,16 @@ const COUNTRY_TIERS_KEY = 'sem_countryTiers';
  */
 const loadRateConfig = () => {
   const stored = localStorage.getItem(RATE_CONFIG_KEY);
-  if (stored) return JSON.parse(stored);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed && parsed.domesticPerDiem) {
+        return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to parse rate config', e);
+    }
+  }
   localStorage.setItem(RATE_CONFIG_KEY, JSON.stringify(seedRateConfig));
   return { ...seedRateConfig };
 };

@@ -38,7 +38,8 @@ export default function BaseLayout() {
     navItems.push(
       { section: true, label: 'Review Queue' },
       { to: '/finance/dashboard', icon: LayoutDashboard, label: 'Finance Dashboard' },
-      { to: '/finance/requests', icon: FileStack, label: 'All Requests' }
+      { to: '/finance/requests', icon: FileStack, label: 'All Requests' },
+      { to: '/finance/kyc-approvals', icon: FileStack, label: 'Vehicle KYC Approvals' }
     );
   }
 

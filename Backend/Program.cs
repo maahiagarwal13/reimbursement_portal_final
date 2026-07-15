@@ -32,8 +32,10 @@ builder.Services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 builder.Services.AddScoped<IMyFilesRepository, MyFilesRepository>();
+builder.Services.AddScoped<IVehicleKYCRepository, VehicleKYCRepository>();
 
 // Services
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IMyFilesService, MyFilesService>();

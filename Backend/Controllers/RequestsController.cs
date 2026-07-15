@@ -84,6 +84,19 @@ public class RequestsController : ControllerBase
         return CreatedAtAction(nameof(GetRequestById), new { id = created.Id }, FrontendRequestDto.FromRequestDto(created));
     }
 
+
+
+    [HttpPost("carpool-reimbursement/submit")]
+    public async Task<ActionResult<FrontendRequestDto>> SubmitCarpoolReimbursement([FromBody] CarpoolRequestDto dto)
+    {
+        var empId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(empId)) return Unauthorized();
+
+        var req = new RequestDto { EmpId = empId, Title = $"Carpool Reimbursement" };
+        var created = await _requestService.CreateCarpoolReimbursementAsync(req, dto);
+        return CreatedAtAction(nameof(GetRequestById), new { id = created.Id }, FrontendRequestDto.FromRequestDto(created));
+    }
+
     [HttpPost("relocation/{empId}")]
     public async Task<ActionResult<FrontendRequestDto>> CreateRelocation(string empId, [FromBody] RelocationRequestDto dto)
     {

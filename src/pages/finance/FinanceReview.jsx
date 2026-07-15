@@ -219,7 +219,46 @@ export default function FinanceReview() {
                 )}
 
                 {/* Carpool */}
-                {request.type === 'carpool' && stl && (
+                {request.type === 'carpool' && stl && stl.logs ? (
+                  <>
+                    <div className="sm:col-span-2">
+                      <strong className="font-medium text-gray-900 dark:text-white block mb-2">Policy configuration for this claim:</strong>
+                      <div className="flex flex-wrap gap-4 text-sm mb-4">
+                        <div><span className="text-gray-500">Fuel Rate:</span> ₹{stl.fuelRate}</div>
+                        <div><span className="text-gray-500">Mileage:</span> {stl.mileage} km/l</div>
+                        <div><span className="text-gray-500">Cap (One Way):</span> ₹{stl.capOneWay}</div>
+                        <div><span className="text-gray-500">Cap (Both Way):</span> ₹{stl.capBothWay}</div>
+                      </div>
+                      <strong className="font-medium text-gray-900 dark:text-white block mb-2">Daily Breakdown:</strong>
+                      <table className="w-full border-collapse text-sm mb-2">
+                        <thead>
+                          <tr className="border-b-2 border-gray-100 dark:border-gray-700 text-left text-xs font-mono uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            <th className="pb-2">Date</th>
+                            <th className="pb-2">Vehicle</th>
+                            <th className="pb-2 text-right">Computed</th>
+                            <th className="pb-2">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                          {stl.logs.map((log, i) => (
+                            <tr key={i}>
+                              <td className="py-2">{formatDate(log.date)}</td>
+                              <td className="py-2">{log.vehicleIdentifier} {log.isCabpool && '(Cab)'}</td>
+                              <td className="py-2 text-right">₹{log.computedAmount?.toFixed(2) || '0.00'}</td>
+                              <td className="py-2">
+                                {log.isEligible ? <span className="text-green-600 font-medium">Eligible</span> : <span className="text-red-500 text-xs" title={log.rejectionReason}>Rejected</span>}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <span className="font-medium text-gray-900 dark:text-white">Total Reimbursable:</span>
+                        <span className="font-mono font-bold text-samsung-blue">₹{stl.totalReimbursable.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </>
+                ) : request.type === 'carpool' && stl && (
                   <>
                     <div><strong className="font-medium text-gray-900 dark:text-white">Claim Month:</strong> {request.dates?.claimMonth}</div>
                     <div><strong className="font-medium text-gray-900 dark:text-white">Vehicle Type:</strong> <span className="capitalize">{stl.vehicleType}</span></div>

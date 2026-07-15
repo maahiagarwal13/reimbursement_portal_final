@@ -12,6 +12,7 @@ public interface IRequestRepository
     Task CreateTravelRequestAsync(RequestDto req, TripRequestDto dto);
     Task CreateInternetRequestAsync(RequestDto req, InternetBillRequestDto dto);
     Task CreateCarpoolRequestAsync(RequestDto req, CarpoolGroupDto dto);
+    Task CreateCarpoolReimbursementAsync(RequestDto req, CarpoolRequestDto dto);
     Task CreateRelocationRequestAsync(RequestDto req, RelocationRequestDto dto);
     
     Task SubmitTripExtensionAsync(string requestId, TripExtensionDto dto);

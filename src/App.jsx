@@ -30,6 +30,7 @@ import ExtendTrip from './pages/travel/ExtendTrip';
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 import FinanceRequests from './pages/finance/FinanceRequests';
 import FinanceReview from './pages/finance/FinanceReview';
+import VehicleKYCApprovals from './pages/finance/VehicleKYCApprovals';
 
 /* Admin pages (Extra access) */
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -135,6 +136,14 @@ export default function App() {
           element={
             <RequireAuth requiredFlag="hasFinanceAccess">
               <FinanceReview />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="finance/kyc-approvals"
+          element={
+            <RequireAuth requiredFlag="hasFinanceAccess">
+              <VehicleKYCApprovals />
             </RequireAuth>
           }
         />

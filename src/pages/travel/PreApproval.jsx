@@ -90,16 +90,20 @@ export default function PreApproval() {
 
   useEffect(() => {
     async function loadDraft() {
-      // Check local storage first
-      const localDraftJson = localStorage.getItem(`draft_travel_${draftId || 'new'}`);
-      if (localDraftJson) {
-        try {
-          const draft = JSON.parse(localDraftJson);
-          if (draft.formData) setFormData(draft.formData);
-          if (draft.step) setStep(draft.step);
-          return; // If local draft exists, use it
-        } catch (err) {
-          console.error("Failed to parse local draft", err);
+      // Remove local storage logic for new requests so they always start empty
+      if (!draftId || draftId === 'new') {
+        localStorage.removeItem('draft_travel_new');
+      } else {
+        const localDraftJson = localStorage.getItem(`draft_travel_${draftId}`);
+        if (localDraftJson) {
+          try {
+            const draft = JSON.parse(localDraftJson);
+            if (draft.formData) setFormData(draft.formData);
+            if (draft.step) setStep(draft.step);
+            return;
+          } catch (err) {
+            console.error("Failed to parse local draft", err);
+          }
         }
       }
 

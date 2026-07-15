@@ -22,6 +22,7 @@ public class RequestDto
     public InternetBillRequestDto? InternetBillRequest { get; set; }
     public CarpoolGroupDto? CarpoolGroup { get; set; }
     public RelocationRequestDto? RelocationRequest { get; set; }
+    public CarpoolRequestDto? CarpoolRequest { get; set; }
 }
 
 // 2. Trip Requests DTOs

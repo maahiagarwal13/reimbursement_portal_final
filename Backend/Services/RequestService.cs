@@ -231,6 +231,14 @@ public class RequestService : IRequestService
         return await _repo.GetRequestByIdAsync(req.Id) ?? req;
     }
 
+    public async Task<RequestDto> CreateCarpoolReimbursementAsync(RequestDto req, CarpoolRequestDto dto)
+    {
+        req.Id = GenerateId();
+        await _repo.CreateCarpoolReimbursementAsync(req, dto);
+        var created = await _repo.GetRequestByIdAsync(req.Id);
+        return created ?? req;
+    }
+
     public async Task<RequestDto> CreateRelocationRequestAsync(RequestDto req, RelocationRequestDto dto)
     {
         req.Id = GenerateId();

@@ -116,6 +116,23 @@ public class FrontendRequestDto
                 members = cg.Members?.Count ?? 0
             };
         }
+        else if (req.Type == "carpool" && req.CarpoolRequest != null)
+        {
+            f.stage = "settlement";
+            f.settlementStatus = req.Status;
+            f.dates = new { startDate = req.SubmittedAt.ToString("yyyy-MM-dd"), endDate = req.SubmittedAt.ToString("yyyy-MM-dd") };
+            var cr = req.CarpoolRequest;
+            f.settlement = new
+            {
+                totalActual = cr.TotalAmount,
+                totalReimbursable = cr.TotalAmount,
+                reimbursementType = cr.ReimbursementType,
+                excelFileId = cr.ExcelFileId,
+                mapScreenshotId = cr.MapScreenshotId,
+                fuelProofId = cr.FuelProofId,
+                userFuelRate = cr.UserFuelRate
+            };
+        }
         else if (req.Type == "relocation" && req.RelocationRequest != null)
         {
             f.stage = "settlement";

@@ -19,6 +19,7 @@ public interface IRequestService
     Task<RequestDto> CreateTravelRequestAsync(RequestDto req, TripRequestDto dto);
     Task<RequestDto> CreateInternetRequestAsync(RequestDto req, InternetBillRequestDto dto);
     Task<RequestDto> CreateCarpoolRequestAsync(RequestDto req, CarpoolGroupDto dto);
+    Task<RequestDto> CreateCarpoolReimbursementAsync(RequestDto req, CarpoolRequestDto dto);
     Task<RequestDto> CreateRelocationRequestAsync(RequestDto req, RelocationRequestDto dto);
 
     // Update operations
